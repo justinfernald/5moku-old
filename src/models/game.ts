@@ -1,3 +1,9 @@
+export enum PlayMode {
+    UNSET,
+    LOCAL,
+    REMOTE,
+}
+
 export enum Player {
     X = "X",
     O = "O",
@@ -23,6 +29,16 @@ export interface Dimensions {
     height: number;
 }
 
+export interface GomokuDTO {
+    size: Dimensions;
+    winAmount: number;
+    board: CellState[][];
+    turn: Player;
+    isGameOver: boolean;
+    winner: Player | null;
+    winLocations: Location[] | null;
+}
+
 export class Gomoku {
     board: CellState[][];
     turn: Player;
@@ -32,6 +48,16 @@ export class Gomoku {
     winner: Player | null = null;
 
     isGameOver = false;
+
+    static fromDTO(dto: GomokuDTO): Gomoku {
+        const gomoku = new Gomoku(dto.size, dto.winAmount);
+        gomoku.board = dto.board;
+        gomoku.turn = dto.turn;
+        gomoku.isGameOver = dto.isGameOver;
+        gomoku.winner = dto.winner;
+        gomoku.winLocations = dto.winLocations;
+        return gomoku;
+    }
 
     constructor(public size: Dimensions, public winAmount = 5) {
         this.turn = [Player.X, Player.O][Math.floor(Math.random() * 2)];
@@ -72,6 +98,8 @@ export class Gomoku {
         this.winLocations = this.checkWin(row, col, this.getTurn());
         if (this.winLocations !== null) {
             this.winner = this.getTurn();
+            this.isGameOver = true;
+        } else if (this.isFull()) {
             this.isGameOver = true;
         }
         this.changeTurn();
@@ -322,6 +350,18 @@ export class Gomoku {
 
         this.setupBoard();
         this.onUpdate();
+    }
+
+    toDTO(): GomokuDTO {
+        return {
+            size: this.size,
+            winAmount: this.winAmount,
+            board: this.board,
+            turn: this.turn,
+            isGameOver: this.isGameOver,
+            winner: this.winner,
+            winLocations: this.winLocations,
+        };
     }
 }
 

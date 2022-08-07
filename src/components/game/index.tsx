@@ -1,18 +1,57 @@
 import { h } from "preact";
-import { useState, useCallback, useRef } from "preact/hooks";
+import { useState, useCallback, useRef, MutableRef } from "preact/hooks";
 
-import { Gomoku } from "../../models/game";
+import { Gomoku, GomokuDTO, PlayMode } from "../../models/game";
 import Grid from "./grid";
 import style from "./style.css";
 import Modal from "react-modal";
+import Peer from "peerjs";
 
 Modal.setAppElement("#app");
 
-const Game = () => {
+const Game = ({
+    host,
+    mode,
+    boardSize = 15,
+    peer,
+    dto,
+}: {
+    host: boolean;
+    mode: PlayMode;
+    boardSize: number;
+    peer?: Peer;
+    dto?: GomokuDTO;
+}) => {
     const [, updateState] = useState<object>();
     const forceUpdate = useCallback(() => updateState({}), []);
 
-    const gameRef = useRef(new Gomoku({ width: 15, height: 15 }));
+    let gameRef: MutableRef<Gomoku>;
+    if (host) {
+        gameRef = useRef(new Gomoku({ width: boardSize, height: boardSize }));
+        if (mode === PlayMode.REMOTE && peer) {
+            peer.on("connection", (conn) => {
+                console.log("connection");
+
+                conn.on("data", (data) => {
+                    console.log("data");
+                    console.log(data);
+                });
+
+                conn.on("open", () => {
+                    console.log("open");
+                    conn.send({
+                        type: "setup",
+                        payload: gameRef.current.toDTO(),
+                    });
+                });
+            });
+        }
+    } else {
+        if (!dto) {
+            throw new Error("dto is required");
+        }
+        gameRef = useRef(Gomoku.fromDTO(dto));
+    }
     const game = gameRef.current;
 
     let isGameOver = game.isGameOver;
@@ -34,9 +73,13 @@ const Game = () => {
                 }}
                 onRequestClose={() => (isGameOver = false)}
                 isOpen={isGameOver}>
-                <div>Way to go {game.winner} player! You won!</div>
+                {game.winner ? (
+                    <div>Way to go {game.winner} player! You won!</div>
+                ) : (
+                    <div>You are both losers! It was a draw.</div>
+                )}
                 <div class={style.resetButton} onClick={() => game.reset()}>
-                    Play again!
+                    Play again
                 </div>
             </Modal>
         </div>
