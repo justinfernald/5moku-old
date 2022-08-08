@@ -108,7 +108,7 @@ const Home = () => {
                 </div>
                 <br />
                 <ClipboardCopy
-                    copyText={`${window.location.origin}/${id}`}
+                    copyText={`${window.location.origin}?g=${id}`}
                 />{" "}
             </Modal>
             {mode !== PlayMode.UNSET && mode === PlayMode.LOCAL ? (
