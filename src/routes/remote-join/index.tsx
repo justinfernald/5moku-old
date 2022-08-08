@@ -17,7 +17,6 @@ const RemoteJoin = ({ id: opponentId }: { id: string }) => {
             const newConnection = newPeer.connect(opponentId);
             newConnection.on("open", () => {
                 console.log("connected");
-                // newConnection.send("connected");
                 setConnection(newConnection);
             });
 

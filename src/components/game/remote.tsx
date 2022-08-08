@@ -54,14 +54,19 @@ const RemoteGame = ({
                     data.type === PeerDataTransferType.STATUS &&
                     data.payload === Status.READY
                 ) {
+                    console.log("other player ready");
                     connection.send(newGameData);
                 }
             });
         } else {
-            connection.send({
-                type: PeerDataTransferType.STATUS,
-                payload: Status.READY,
-            });
+            setTimeout(
+                () =>
+                    connection.send({
+                        type: PeerDataTransferType.STATUS,
+                        payload: Status.READY,
+                    }),
+                1000
+            );
             connection.on("data", (data) => {
                 if (!isPeerDataTransfer(data))
                     throw new Error("Invalid peer data transfer");
@@ -82,6 +87,7 @@ const RemoteGame = ({
             if (!isPeerDataTransfer(data))
                 throw new Error("Invalid peer data transfer");
 
+            console.log({ data });
             if (data.type === PeerDataTransferType.MOVE) {
                 game.placeCell(data.payload.row, data.payload.col);
             }
