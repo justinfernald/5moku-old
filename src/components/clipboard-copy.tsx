@@ -21,7 +21,7 @@ export function ClipboardCopy({ copyText }: { copyText: string }) {
                 }, 1500);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
             });
     };
     return (

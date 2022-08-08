@@ -1,20 +1,21 @@
 import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import Game from "../../components/game";
 import style from "./style.css";
 import Modal from "react-modal";
 
 import { v4 as uuid } from "uuid";
-import Peer from "peerjs";
-import { ClipboardCopy } from "../../components/clipboard-copy";
-import { PlayMode } from "../../models/game";
+import Peer, { DataConnection } from "peerjs";
+import { ClipboardCopy } from "src/components/clipboard-copy";
+import { PlayMode } from "src/models/game";
+import RemoteGame from "src/components/game/remote";
+import LocalGame from "src/components/game/local";
 
 Modal.setAppElement("#app");
 
 const Home = () => {
     const [mode, setMode] = useState(PlayMode.UNSET);
     const [boardSize, setBoardSize] = useState(15);
-    const [hasConnected, setHasConnected] = useState(false);
+    const [connection, setConnection] = useState<DataConnection | null>(null);
     const [id, setId] = useState<string | null>(null);
     const [peer, setPeer] = useState<Peer | null>(null);
 
@@ -23,18 +24,18 @@ const Home = () => {
         const newId = uuid();
         setId(newId);
         const newPeer = new Peer(newId);
-        console.log({ host: newId });
 
         newPeer.on("connection", (conn) => {
-            setHasConnected(true);
+            console.log("connected");
+
+            setConnection(conn);
         });
 
         setPeer(newPeer);
     }, [mode]);
 
     return (
-        <div class={style.home}>
-            <p>This is a Gomoku game created by Justin in a day for fun.</p>
+        <div class={style.page}>
             <Modal
                 style={{
                     content: {
@@ -99,7 +100,7 @@ const Home = () => {
                         background: "unset",
                     },
                 }}
-                isOpen={mode === PlayMode.REMOTE && !hasConnected}>
+                isOpen={mode === PlayMode.REMOTE && !connection}>
                 <div>
                     Send this link to your friend...
                     <br />
@@ -110,13 +111,17 @@ const Home = () => {
                     copyText={`${window.location.origin}/${id}`}
                 />{" "}
             </Modal>
-            {mode !== PlayMode.UNSET && (
-                <Game
-                    host={true}
-                    mode={mode}
-                    boardSize={boardSize}
-                    peer={peer ?? undefined}
-                />
+            {mode !== PlayMode.UNSET && mode === PlayMode.LOCAL ? (
+                <LocalGame boardSize={boardSize} />
+            ) : (
+                peer &&
+                connection && (
+                    <RemoteGame
+                        host={true}
+                        boardSize={boardSize}
+                        connection={connection}
+                    />
+                )
             )}
         </div>
     );

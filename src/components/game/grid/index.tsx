@@ -1,8 +1,15 @@
 import { h } from "preact";
-import { CellState, Gomoku, Location } from "../../../models/game";
+import { c } from "src/utils";
+import { CellState, Gomoku, Location } from "src/models/game";
 import style from "./style.css";
 
-const Grid = ({ game }: { game: Gomoku }) => (
+const Grid = ({
+    game,
+    onCellClick,
+}: {
+    game: Gomoku;
+    onCellClick: (location: Location) => void;
+}) => (
     <div class={style.root}>
         {game.board.map((row, y) => (
             <div key={y} class={style.row}>
@@ -12,6 +19,7 @@ const Grid = ({ game }: { game: Gomoku }) => (
                         game={game}
                         location={{ col: x, row: y }}
                         cellState={cell}
+                        onClick={onCellClick}
                     />
                 ))}
             </div>
@@ -23,17 +31,19 @@ const Cell = ({
     game,
     location,
     cellState,
+    onClick,
 }: {
     game: Gomoku;
     location: Location;
     cellState: CellState;
+    onClick?: (location: Location) => void;
 }) => (
     <div
-        class={[
+        class={c(
             style.cell,
-            game.isWinningCell(location) ? style.winning : undefined,
-        ].join(" ")}
-        onClick={() => game.placeCell(location.row, location.col)}>
+            game.isWinningCell(location) ? style.winning : undefined
+        )}
+        onClick={() => onClick?.(location)}>
         {cellState === CellState.EMPTY ? null : cellState === CellState.X ? (
             <div class={style.x} />
         ) : (

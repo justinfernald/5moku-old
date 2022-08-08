@@ -1,10 +1,57 @@
 import { h } from "preact";
+import { useState } from "preact/hooks";
 import style from "./style.css";
 
-const Header = () => (
-    <header class={style.header}>
-        <h1>Gomoku</h1>
-    </header>
-);
+import Modal from "react-modal";
+
+const Header = () => {
+    const [showModel, setShowModel] = useState(false);
+
+    return (
+        <header class={style.header}>
+            <h1>5moku</h1>
+            <div onClick={() => setShowModel((showModel) => !showModel)}>?</div>
+
+            <Modal
+                style={{
+                    content: {
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                        border: "none",
+                        boxShadow:
+                            "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
+                        maxWidth: 500,
+                    },
+                }}
+                isOpen={showModel}
+                onRequestClose={() => setShowModel(false)}>
+                <div>
+                    <p>
+                        This is a Gomoku game created by Justin in a day-ish for
+                        fun. This was a test using peer to peer networking which
+                        allows for this game to run with live multiplier without
+                        a external server.
+                    </p>
+
+                    <p>
+                        Gomoku is an abstract strategy board game and is also
+                        called Five in a Row. It is traditionally played on a
+                        board with size 19x19. However, because once placed,
+                        pieces are not moved or removed from the board, Gomoku
+                        may also be played as a paper and pencil game. This game
+                        is known in several countries under different names. The
+                        name Gomoku comes from the Japanese language, in which
+                        it is referred to as gomokunarabe. Go means five, moku
+                        is a counter word for pieces and narabe means line-up.
+                    </p>
+                </div>
+            </Modal>
+        </header>
+    );
+};
 
 export default Header;

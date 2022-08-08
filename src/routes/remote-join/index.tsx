@@ -1,58 +1,34 @@
 import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import Game from "../../components/game";
+import RemoteGame from "src/components/game/remote";
 import style from "./style.css";
-import Modal from "react-modal";
 
 import { v4 as uuid } from "uuid";
-import Peer from "peerjs";
-import { GomokuDTO, PlayMode } from "../../models/game";
-
-Modal.setAppElement("#app");
+import Peer, { DataConnection } from "peerjs";
 
 const RemoteJoin = ({ id: opponentId }: { id: string }) => {
-    const [boardSize, setBoardSize] = useState(15);
-    const [hasConnected, setHasConnected] = useState(false);
-    const [id, setId] = useState<string | null>(null);
-    const [peer, setPeer] = useState<Peer | null>(null);
-    const [dto, setDto] = useState<GomokuDTO | null>(null);
+    const [connection, setConnection] = useState<DataConnection | null>(null);
 
     useEffect(() => {
         const newId = uuid();
-        setId(newId);
         const newPeer = new Peer(newId);
-        console.log({ remote: newId, host: opponentId });
-        setPeer(newPeer);
         newPeer.on("open", () => {
-            const connection = newPeer.connect(opponentId);
-            connection.on("open", () => {
-                setHasConnected(true);
+            console.log("connecting");
+            const newConnection = newPeer.connect(opponentId);
+            newConnection.on("open", () => {
                 console.log("connected");
-                // connection.send("hi!");
+                // newConnection.send("connected");
+                setConnection(newConnection);
             });
 
-            connection.on("data", (data: any) => {
-                console.log("data");
-                console.log(data);
-                if (data.type === "setup") {
-                    setDto(data.payload);
-                }
-            });
+            newConnection.on("data", console.log);
         });
     }, []);
 
     return (
-        <div class={style.home}>
-            <p>This is a Gomoku game created by Justin in a day for fun.</p>
-
-            {hasConnected && peer && dto ? (
-                <Game
-                    host={false}
-                    mode={PlayMode.REMOTE}
-                    boardSize={boardSize}
-                    peer={peer}
-                    dto={dto}
-                />
+        <div class={style.page}>
+            {connection ? (
+                <RemoteGame host={false} connection={connection} />
             ) : (
                 <div>Connecting...</div>
             )}

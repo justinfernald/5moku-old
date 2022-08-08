@@ -39,6 +39,47 @@ export interface GomokuDTO {
     winLocations: Location[] | null;
 }
 
+export enum Status {
+    READY,
+    DISCONNECT,
+}
+
+export enum PeerDataTransferType {
+    STATUS,
+    SETUP,
+    MOVE,
+    RESET,
+}
+
+export const PeerDataTransferTypes = [
+    PeerDataTransferType.STATUS,
+    PeerDataTransferType.SETUP,
+    PeerDataTransferType.MOVE,
+    PeerDataTransferType.RESET,
+];
+
+export type PeerDataTransfer =
+    | {
+          type: PeerDataTransferType.STATUS;
+          payload: Status;
+      }
+    | {
+          type: PeerDataTransferType.SETUP;
+          payload: { game: GomokuDTO; player: Player };
+      }
+    | {
+          type: PeerDataTransferType.MOVE;
+          payload: Location;
+      }
+    | {
+          type: PeerDataTransferType.RESET;
+          payload: Player;
+      };
+
+export function isPeerDataTransfer(data: any): data is PeerDataTransfer {
+    return PeerDataTransferTypes.includes(data.type);
+}
+
 export class Gomoku {
     board: CellState[][];
     turn: Player;
@@ -60,7 +101,8 @@ export class Gomoku {
     }
 
     constructor(public size: Dimensions, public winAmount = 5) {
-        this.turn = [Player.X, Player.O][Math.floor(Math.random() * 2)];
+        this.turn = Player.X;
+        // this.turn = [Player.X, Player.O][Math.floor(Math.random() * 2)];
 
         this.board = [];
         this.setupBoard();
@@ -340,8 +382,9 @@ export class Gomoku {
         this.updateHandler.forEach((cb) => cb());
     }
 
-    reset() {
-        this.turn = [Player.X, Player.O][Math.floor(Math.random() * 2)];
+    reset = () => {
+        this.turn = Player.X;
+        // this.turn = [Player.X, Player.O][Math.floor(Math.random() * 2)];
 
         this.board = [];
         this.isGameOver = false;
@@ -350,7 +393,7 @@ export class Gomoku {
 
         this.setupBoard();
         this.onUpdate();
-    }
+    };
 
     toDTO(): GomokuDTO {
         return {
