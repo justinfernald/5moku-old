@@ -1,6 +1,6 @@
 {
-    "name": "gomoku",
-    "short_name": "gomoku",
+    "name": "5moku",
+    "short_name": "5moku",
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait",
