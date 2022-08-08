@@ -132,7 +132,11 @@ const RemoteGame = ({
                 onRequestClose={() => (isGameOver = false)}
                 isOpen={isGameOver}>
                 {game.winner ? (
-                    <div>Way to go {game.winner} player! You won!</div>
+                    game.winner === player ? (
+                        <div>Way to go {game.winner} player! You won!</div>
+                    ) : (
+                        <div>{game.winner} won! You lost!</div>
+                    )
                 ) : (
                     <div>You are both losers! It was a draw.</div>
                 )}
