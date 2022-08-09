@@ -12,19 +12,19 @@ import {
 import Grid from "./grid";
 import style from "./style.css";
 import Modal from "react-modal";
-import Peer, { DataConnection } from "peerjs";
 import { useUpdater } from "src/utils/hooks/useUpdate";
+import { ConnectionHandler } from "src/utils/connection-handler";
 
 Modal.setAppElement("#app");
 
 const RemoteGame = ({
     host,
     boardSize = 15,
-    connection,
+    connectionHandler,
 }: {
     host: boolean;
     boardSize?: number;
-    connection: DataConnection;
+    connectionHandler: ConnectionHandler;
 }) => {
     const forceUpdate = useUpdater();
     const [game, setGame] = useState<Gomoku | null>(null);
@@ -47,35 +47,26 @@ const RemoteGame = ({
                 },
             };
 
-            connection.on("data", (data) => {
-                if (!isPeerDataTransfer(data))
-                    throw new Error("Invalid peer data transfer");
+            connectionHandler.addListener((data, didHandle) => {
                 if (
                     data.type === PeerDataTransferType.STATUS &&
                     data.payload === Status.READY
                 ) {
-                    console.log("other player ready");
-                    connection.send(newGameData);
+                    connectionHandler.connection.send(newGameData);
+                    didHandle();
                 }
             });
         } else {
-            setTimeout(
-                () =>
-                    connection.send({
-                        type: PeerDataTransferType.STATUS,
-                        payload: Status.READY,
-                    }),
-                1000
-            );
-            connection.on("data", (data) => {
-                if (!isPeerDataTransfer(data))
-                    throw new Error("Invalid peer data transfer");
+            connectionHandler.connection.send({
+                type: PeerDataTransferType.STATUS,
+                payload: Status.READY,
+            });
 
-                console.log({ data });
-
+            connectionHandler.addListener((data, didHandle) => {
                 if (data.type === PeerDataTransferType.SETUP) {
                     setGame(Gomoku.fromDTO(data.payload.game));
                     setPlayer(data.payload.player);
+                    didHandle();
                 }
             });
         }
@@ -83,18 +74,16 @@ const RemoteGame = ({
 
     useEffect(() => {
         if (!game) return;
-        connection.on("data", (data) => {
-            if (!isPeerDataTransfer(data))
-                throw new Error("Invalid peer data transfer");
-
-            console.log({ data });
+        connectionHandler.addListener((data, didHandle) => {
             if (data.type === PeerDataTransferType.MOVE) {
                 game.placeCell(data.payload.row, data.payload.col);
+                didHandle();
             }
 
             if (data.type === PeerDataTransferType.RESET) {
                 game.reset();
                 setPlayer(data.payload);
+                didHandle();
             }
         });
     }, [game]);
@@ -120,7 +109,7 @@ const RemoteGame = ({
                             type: PeerDataTransferType.MOVE,
                             payload: location,
                         };
-                        connection.send(placementData);
+                        connectionHandler.connection.send(placementData);
                     }
                 }}
             />
@@ -158,7 +147,7 @@ const RemoteGame = ({
                             payload:
                                 newPlayer === Player.X ? Player.O : Player.X,
                         };
-                        connection.send(newGameData);
+                        connectionHandler.connection.send(newGameData);
                         game.reset();
                     }}>
                     Play again

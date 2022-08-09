@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
-        "build": "preact build --no-prerender",
+        "build": "preact build --no-prerender & echo 5moku.justinfernald.com > build/CNAME",
         "serve": "sirv build --cors --single",
         "dev": "preact watch",
         "lint": "eslint src",

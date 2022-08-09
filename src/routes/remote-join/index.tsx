@@ -5,29 +5,31 @@ import style from "./style.css";
 
 import { v4 as uuid } from "uuid";
 import Peer, { DataConnection } from "peerjs";
+import { ConnectionHandler } from "src/utils/connection-handler";
 
 const RemoteJoin = ({ id: opponentId }: { id: string }) => {
-    const [connection, setConnection] = useState<DataConnection | null>(null);
+    const [connectionHandler, setConnectionHandler] =
+        useState<ConnectionHandler | null>(null);
 
     useEffect(() => {
         const newId = uuid();
         const newPeer = new Peer(newId);
         newPeer.on("open", () => {
-            console.log("connecting");
             const newConnection = newPeer.connect(opponentId);
-            newConnection.on("open", () => {
-                console.log("connected");
-                setConnection(newConnection);
-            });
-
-            newConnection.on("data", console.log);
+            const newConnectionHandler = new ConnectionHandler(newConnection);
+            newConnection.on("open", () =>
+                setConnectionHandler(newConnectionHandler)
+            );
         });
     }, []);
 
     return (
         <div class={style.page}>
-            {connection ? (
-                <RemoteGame host={false} connection={connection} />
+            {connectionHandler ? (
+                <RemoteGame
+                    host={false}
+                    connectionHandler={connectionHandler}
+                />
             ) : (
                 <div>Connecting...</div>
             )}

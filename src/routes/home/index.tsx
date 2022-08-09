@@ -6,16 +6,22 @@ import Modal from "react-modal";
 import { v4 as uuid } from "uuid";
 import Peer, { DataConnection } from "peerjs";
 import { ClipboardCopy } from "src/components/clipboard-copy";
-import { PlayMode } from "src/models/game";
+import {
+    isPeerDataTransfer,
+    PeerDataTransfer,
+    PlayMode,
+} from "src/models/game";
 import RemoteGame from "src/components/game/remote";
 import LocalGame from "src/components/game/local";
+import { ConnectionHandler } from "src/utils/connection-handler";
 
 Modal.setAppElement("#app");
 
 const Home = () => {
     const [mode, setMode] = useState(PlayMode.UNSET);
     const [boardSize, setBoardSize] = useState(15);
-    const [connection, setConnection] = useState<DataConnection | null>(null);
+    const [connectionHandler, setConnectionHandler] =
+        useState<ConnectionHandler | null>(null);
     const [id, setId] = useState<string | null>(null);
     const [peer, setPeer] = useState<Peer | null>(null);
 
@@ -25,11 +31,9 @@ const Home = () => {
         setId(newId);
         const newPeer = new Peer(newId);
 
-        newPeer.on("connection", (conn) => {
-            console.log("connected");
-
-            setConnection(conn);
-        });
+        newPeer.on("connection", (conn) =>
+            setConnectionHandler(new ConnectionHandler(conn))
+        );
 
         setPeer(newPeer);
     }, [mode]);
@@ -100,7 +104,7 @@ const Home = () => {
                         background: "unset",
                     },
                 }}
-                isOpen={mode === PlayMode.REMOTE && !connection}>
+                isOpen={mode === PlayMode.REMOTE && !connectionHandler}>
                 <div>
                     Send this link to your friend...
                     <br />
@@ -115,11 +119,11 @@ const Home = () => {
                 <LocalGame boardSize={boardSize} />
             ) : (
                 peer &&
-                connection && (
+                connectionHandler && (
                     <RemoteGame
                         host={true}
                         boardSize={boardSize}
-                        connection={connection}
+                        connectionHandler={connectionHandler}
                     />
                 )
             )}
