@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[4],{GKwV:function(n,e,o){"use strict";o.r(e);var c=o("hosL"),t=o("QRet"),s=o("Gspg"),a="page__CrAPo",i=o("A3AF"),p=o("y8Uo"),w=o("o+Sk");e.default=({id:n})=>{const[e,o]=Object(t.k)(null);return Object(t.d)((()=>{const e=Object(i.a)(),c=new p.a(e);c.on("open",(()=>{const e=c.connect(n),t=new w.a(e);e.on("open",(()=>o(t)))}))}),[]),Object(c.h)("div",{class:a},e?Object(c.h)(s.a,{host:!1,connectionHandler:e}):Object(c.h)("div",null,"Connecting..."))}}}]);
+//# sourceMappingURL=route-remote-join.chunk.b8a52.esm.js.map
