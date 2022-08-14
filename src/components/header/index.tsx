@@ -48,6 +48,12 @@ const Header = () => {
                         it is referred to as gomokunarabe. Go means five, moku
                         is a counter word for pieces and narabe means line-up.
                     </p>
+
+                    <a
+                        href="https://github.com/justinfernald/5moku"
+                        target="blank">
+                        View Source Code here
+                    </a>
                 </div>
             </Modal>
         </header>
